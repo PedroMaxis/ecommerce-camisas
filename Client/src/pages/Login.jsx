@@ -9,7 +9,7 @@ function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:3000/api/auth/login', { email, password })
+    axios.post('https://ecommerce-camisas.onrender.com/api/auth/login', { email, password })
       .then((response) => {
         localStorage.setItem('token', response.data.token);
         alert('Login successful!');

@@ -7,7 +7,7 @@ function Cart() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:3000/api/cart', {
+    axios.get('https://ecommerce-camisas.onrender.com/api/cart', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => setCart(response.data.CartItems || []))
@@ -17,7 +17,7 @@ function Cart() {
   const removeItem = (productId) => {
     const token = localStorage.getItem('token');
     axios.post(
-      'http://localhost:3000/api/cart/remove',
+      'https://ecommerce-camisas.onrender.com/api/cart/remove',
       { productId },
       { headers: { Authorization: `Bearer ${token}` } }
     )
@@ -31,7 +31,7 @@ function Cart() {
   const handleCheckout = () => {
     const token = localStorage.getItem('token');
     axios.post(
-      'http://localhost:3000/api/orders',
+      'https://ecommerce-camisas.onrender.com/api/orders',
       {},
       { headers: { Authorization: `Bearer ${token}` } }
     )

@@ -6,7 +6,7 @@ function Orders() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:3000/api/orders', {
+    axios.get('https://ecommerce-camisas.onrender.com/api/orders', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => setOrders(response.data))

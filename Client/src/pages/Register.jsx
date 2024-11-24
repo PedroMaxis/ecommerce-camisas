@@ -11,7 +11,7 @@ function Register() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    axios.post('http://localhost:3000/api/auth/register', { name, email, password })
+    axios.post('https://ecommerce-camisas.onrender.com/api/auth/register', { name, email, password })
       .then(() => {
         alert('Registration successful! You can now log in.');
         navigate('/login');

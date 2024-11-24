@@ -6,7 +6,7 @@ function Home() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:3000/api/products')
+    axios.get('https://ecommerce-camisas.onrender.com/api/products')
       .then((response) => setProducts(response.data))
       .catch((error) => console.error(error));
   }, []);
@@ -14,7 +14,7 @@ function Home() {
   const addToCart = (productId) => {
     const token = localStorage.getItem('token');
     axios.post(
-      'http://localhost:3000/api/cart/add',
+      'https://ecommerce-camisas.onrender.com/api/cart/add',
       { productId, quantity: 1 },
       { headers: { Authorization: `Bearer ${token}` } }
     )
