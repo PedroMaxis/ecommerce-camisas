@@ -1,24 +1,25 @@
-import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Cart from './pages/Cart';
-import Orders from './pages/Orders';
+import { Route, Routes } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Loja from "./pages/Loja";
+import Produto from "./pages/Produto";
+import Carrinho from "./pages/Carrinho";
+import Pedidos from "./pages/Pedidos";
+import Entrar from "./pages/Entrar";
+import { Link } from "react-router-dom";
 
-function App() {
+export default function App() {
   return (
-    <div>
+    <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/orders" element={<Orders />} />
+        <Route path="/" element={<Loja />} />
+        <Route path="/camisa/:id" element={<Produto />} />
+        <Route path="/carrinho" element={<Carrinho />} />
+        <Route path="/pedidos" element={<Pedidos />} />
+        <Route path="/entrar" element={<Entrar />} />
+        <Route path="*" element={<main className="vazio"><h1>Página não encontrada</h1><Link to="/" className="btn">Voltar à loja</Link></main>} />
       </Routes>
-    </div>
+      <footer className="rodape">Tinta Fresca · projeto de estudo, nenhuma compra é cobrada de verdade.</footer>
+    </>
   );
 }
-
-export default App;

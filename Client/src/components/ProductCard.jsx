@@ -1,18 +1,22 @@
-import React from 'react';
+import { Link } from "react-router-dom";
+import Camisa from "./Camisa";
+import { reais, totalEstoque, ultimas } from "../lib/dinheiro";
 
-function ProductCard({ product, onAddToCart }) {
+export default function ProductCard({ produto: p, indice }) {
+  const esgotado = totalEstoque(p.stock) === 0;
+  const poucas = ultimas(p.stock);
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 transition-transform transform hover:scale-105">
-      <img src={product.imageUrl} alt={product.name} className="w-full h-64 object-cover rounded-lg mb-4" />
-      <h3 className="text-xl font-medium mb-2">{product.name}</h3>
-      <p className="text-gray-600 mb-4">{product.description}</p>
-      <button 
-        onClick={() => onAddToCart(product.id)} 
-        className="bg-green-500 text-white px-4 py-2 rounded-lg w-full transition-colors hover:bg-green-600">
-        Add to Cart
-      </button>
-    </div>
+    <Link to={`/camisa/${p.id}`} className={`cartao ${esgotado ? "esgotado" : ""}`} style={{ "--i": indice }}>
+      <div className="cartao-arte" style={{ "--fundo": p.color }}>
+        <Camisa cor={p.color} design={p.design} titulo={`Camisa ${p.name}`} />
+        {esgotado && <span className="selo selo-fim">Esgotada</span>}
+        {poucas > 0 && <span className="selo">Últimas {poucas}</span>}
+      </div>
+      <div className="cartao-info">
+        <span className="num">Nº {String(p.id).padStart(2, "0")}</span>
+        <h3>{p.name}</h3>
+        <span className="preco">{reais(p.priceCents)}</span>
+      </div>
+    </Link>
   );
 }
-
-export default ProductCard;

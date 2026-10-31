@@ -1,25 +1,28 @@
 {
-  "name": "ecommerce-backend",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+  "name": "ecommerce-camisas-api",
+  "version": "2.0.0",
+  "private": true,
+  "description": "API da loja de camisas (Express + SQLite)",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22.13"
   },
-  "keywords": [],
-  "author": "",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch --env-file-if-exists=.env src/server.js",
+    "seed": "node --env-file-if-exists=.env scripts/seed.js",
+    "test": "node --test test/"
+  },
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
-    "jsonwebtoken": "^9.0.2",
-    "sequelize": "^6.37.5",
-    "sqlite3": "^5.1.7"
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.2",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.7"
+    "supertest": "^7.3.1"
   }
 }

@@ -1,193 +1,80 @@
-# Documentação do Eccomerce de camiseta
-Este documento descreve as funcionalidades dos controladores da API do backend, que inclui autenticação, gerenciamento de carrinhos, pedidos e produtos e Instalção do sistema. 
+# Tinta Fresca — loja de camisas
 
-### Certifique-se de que você possui os seguintes softwares instalados:
-- **Node.js** (v16 ou superior)
-- **npm** (ou **yarn**) para gerenciamento de pacotes
-- **Banco de Dados SQLite** (configurado automaticamente)
+Loja online de camisas em edições pequenas: vitrine, escolha de tamanho com estoque real, sacola, pedidos e conta de cliente. API em **Express + SQLite** e front em **React + Vite**.
 
-### Passos de Instalação
+| Vitrine | Camisa | Sacola | Pedidos |
+|---|---|---|---|
+| ![Vitrine](docs/loja.png) | ![Camisa](docs/produto.png) | ![Sacola](docs/sacola.png) | ![Pedidos](docs/pedidos.png) |
 
-1. **Clone o Repositório**
-   Baixe o código-fonte do repositório:
-   ```bash
-   git clone https://github.com/PedroMaxis/ecommerce-camisas.git
-   cd ecommerce-camisas   
-2. **Instale as dependencias**
-   ```bash
-   npm install
-3. **Configure as Variáveis de Ambiente**
-     Crie um arquivo .env na raiz do projeto e adicione as seguintes variáveis:
-   ```bash
-   PORT=3000
-   JWT_SECRET=sua_chave_secreta
-3. **Inicie o servidor**
-      Inicie o servidor local:
-   ```bash
-   node server.js
----
+> Projeto de estudo: nenhum pagamento é processado. O pedido fica "aguardando pagamento".
 
-## Controladores e Suas Funcionalidades
+## O que tem
 
-### 1. AuthController
-Responsável pela autenticação de usuários, incluindo registro e login.
+- **Estoque por tamanho**: tamanhos esgotados ficam bloqueados, e "últimas unidades" aparece quando restam poucas.
+- **Sacola** com quantidade ajustável, total em tempo real e validação contra o estoque.
+- **Fechar pedido é atômico**: confere e baixa o estoque, grava o pedido e esvazia a sacola numa única transação. Se um item acabou no meio do caminho, nada é alterado.
+- **Preço nunca vem do cliente**: o servidor recalcula tudo a partir do banco, e o pedido guarda nome e preço da época da compra.
+- **Contas**: cadastro e login com senha em bcrypt, JWT, e-mail único sem distinção de maiúsculas, limite de tentativas nas rotas de autenticação.
+- **Administração** (`role = admin`): criar, editar (preço, estoque) e remover produtos pela API.
+- Camisas desenhadas em **SVG** a partir dos dados (cor + estampa): sem imagens para hospedar.
+- Valores em **centavos inteiros** no banco e na API, formatados só na tela.
 
-#### Endpoints
+## Rodando
 
-- Registro de Usuário (`register`)
-  Cria um novo usuário no sistema.
-  - Método: POST
-  - Rota: /auth/register
-  - Corpo da Requisição:
-    {
-      "name": "string",
-      "email": "string",
-      "password": "string"
-    }
-  - Resposta:
-    Retorna o usuário recém-criado (exceto a senha).
+Precisa de Node 22.13 ou mais novo (usa o SQLite embutido, `node:sqlite`: nada para compilar).
 
-- Login de Usuário (`login`)
-  Autentica o usuário e retorna um token JWT.
-  - Método: POST
-  - Rota: /auth/login
-  - Corpo da Requisição:
-    {
-      "email": "string",
-      "password": "string"
-    }
-  - Resposta:
-    {
-      "token": "string"
-    }
+```bash
+npm install
+npm --prefix Client install
 
----
+cp .env.example .env        # opcional; defina ADMIN_PASSWORD para criar um administrador
+npm run dev                 # API em http://localhost:3000 (cria o banco e o catálogo na 1ª vez)
+npm --prefix Client run dev # front em http://localhost:5173 (proxy de /api para a porta 3000)
+```
 
-### 2. CartController
-Gerencia o carrinho de compras do usuário.
+Testes e verificações:
 
-#### Endpoints
+```bash
+npm test                        # API: 13 testes (node:test + supertest)
+npm --prefix Client test        # front
+npm --prefix Client run lint
+npm --prefix Client run build
+```
 
-- Adicionar ao Carrinho (`addToCart`)
-  Adiciona ou atualiza itens no carrinho do usuário.
-  - Método: POST
-  - Rota: /cart/add
-  - Corpo da Requisição:
-    {
-      "productId": "integer",
-      "quantity": "integer"
-    }
-  - Resposta:
-    Mensagem confirmando o item adicionado.
+## Em produção
 
-- Visualizar Carrinho (`getCart`)
-  Recupera o carrinho atual do usuário, incluindo produtos e quantidades.
-  - Método: GET
-  - Rota: /cart
-  - Resposta:
-    {
-      "id": "integer",
-      "UserId": "integer",
-      "items": [
-        {
-          "id": "integer",
-          "ProductId": "integer",
-          "quantity": "integer",
-          "Product": {
-            "name": "string",
-            "price": "number"
-          }
-        }
-      ]
-    }
+`npm --prefix Client run build` gera `Client/dist`, e o Express passa a servir o front no mesmo endereço da API. O `render.yaml` descreve o serviço no Render (disco persistente para o SQLite). Em produção **`JWT_SECRET` é obrigatório**: sem ele o servidor se recusa a subir.
 
-- Remover do Carrinho (`removeFromCart`)
-  Remove um item específico do carrinho do usuário.
-  - Método: DELETE
-  - Rota: /cart/remove
-  - Corpo da Requisição:
-    {
-      "productId": "integer"
-    }
-  - Resposta:
-    Mensagem confirmando a remoção.
+## API
 
----
+Todas as rotas ficam em `/api`. Erros vêm como `{ "error": "mensagem em português" }`. Rotas marcadas com 🔒 exigem `Authorization: Bearer <token>`.
 
-### 3. OrderController
-Gerencia os pedidos dos usuários.
+| Método | Rota | O que faz |
+|---|---|---|
+| POST | `/users/register` | `{ name, email, password }` → `{ token, user }` |
+| POST | `/users/login` | `{ email, password }` → `{ token, user }` |
+| GET | `/users/me` 🔒 | usuário atual |
+| GET | `/products` | catálogo com estoque por tamanho |
+| GET | `/products/:id` | uma camisa |
+| POST / PATCH / DELETE | `/products[/:id]` 🔒 admin | criar, editar e remover (remover só desativa) |
+| GET | `/cart` 🔒 | sacola com totais |
+| POST | `/cart/items` 🔒 | `{ productId, size, quantity }` soma à sacola |
+| PUT | `/cart/items` 🔒 | define a quantidade exata (0 remove) |
+| DELETE | `/cart` 🔒 | esvazia |
+| POST | `/orders` 🔒 | fecha a sacola num pedido |
+| GET | `/orders`, `/orders/:id` 🔒 | seus pedidos, com itens |
 
-#### Endpoints
+Dinheiro sempre em centavos (`priceCents`, `totalCents`, `unitPriceCents`). Tamanhos: `PP P M G GG`.
 
-- Criar Pedido (`createOrder`)
-  Converte os itens do carrinho em um pedido.
-  - Método: POST
-  - Rota: /order/create
-  - Resposta:
-    Retorna os detalhes do pedido criado.
+## Estrutura
 
-- Listar Pedidos (`getOrders`)
-  Lista os pedidos feitos pelo usuário autenticado.
-  - Método: GET
-  - Rota: /orders
-  - Resposta:
-    [
-      {
-        "id": "integer",
-        "UserId": "integer",
-        "status": "string",
-        "totalPrice": "number"
-      }
-    ]
+```
+src/          API (app, rotas, validação, banco, autenticação)
+scripts/      seed do catálogo
+test/         testes da API
+Client/src/   React: páginas, componentes, contextos (sessão, sacola, avisos)
+```
 
----
+## O que mudou nesta versão
 
-### 4. ProductController
-Gerencia os produtos disponíveis para compra.
-
-#### Endpoints
-
-- Criar Produto (`createProduct`)
-  Adiciona um novo produto ao sistema.
-  - Método: POST
-  - Rota: /product/create
-  - Corpo da Requisição:
-    {
-      "name": "string",
-      "price": "number"
-    }
-  - Resposta:
-    Retorna os detalhes do produto criado.
-
-- Listar Produtos (`getProducts`)
-  Lista todos os produtos disponíveis no sistema.
-  - Método: GET
-  - Rota: /products
-  - Resposta:
-    [
-      {
-        "id": "integer",
-        "name": "string",
-        "price": "number"
-      }
-    ]
-
----
-
-## Observações Gerais
-
-- Autenticação:
-  Todas as rotas, exceto as de autenticação, requerem que o usuário esteja autenticado. O token JWT deve ser enviado no cabeçalho da requisição como:
-    {
-      "Authorization": "Bearer <token>"
-    }
-
-- Erros:
-  Em caso de erro, as respostas seguem o padrão HTTP, como:
-  - 401 Unauthorized: Credenciais inválidas.
-  - 404 Not Found: Recurso não encontrado.
-  - 400 Bad Request: Requisição malformada.
-
----
-
-Com essa documentação, você pode utilizar os endpoints da API para gerenciar usuários, carrinhos, pedidos e produtos no sistema.
+A primeira versão (2021–22) tinha problemas que esta corrige: o fechamento de pedido quebrava (o preço do produto nunca era carregado), o servidor caía com qualquer requisição sem token, o hash da senha voltava na resposta do cadastro, qualquer usuário podia criar produtos, não havia estoque, `alert()` fazia as vezes de interface, e o front apontava para um endereço fixo. Tudo foi reescrito com testes.
