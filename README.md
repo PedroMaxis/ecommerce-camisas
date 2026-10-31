@@ -2,6 +2,8 @@
 
 Loja online de blusas com estampa brasileira em tiragem curta: copacabana, azulejo, fita do Bonfim, arara, cajú, cobogó, carnaval. Tem vitrine, filtros, busca, favoritos, avaliações, sacola com cupom, frete por CEP, checkout com endereço e pagamento, acompanhamento de pedido e painel de administração. API em **Express + SQLite** e front em **React + Vite**, animado com **GSAP**.
 
+**Demo online:** https://pedromaxis.github.io/ecommerce-camisas/ (a loja inteira roda no navegador, sem servidor: cadastro, sacola, cupom, checkout e painel do admin com `admin@ginga.local` / `admin-local-123`; os dados voltam ao início a cada visita).
+
 | Hero | Do Oiapoque ao Chuí | Vitrine |
 |---|---|---|
 | ![Hero](docs/hero.png) | ![Regiões](docs/regioes.png) | ![Vitrine](docs/vitrine.png) |
@@ -63,6 +65,10 @@ npm --prefix Client test        # front
 npm --prefix Client run lint
 npm --prefix Client run build
 ```
+
+### Demo no GitHub Pages
+
+O Pages só serve arquivos estáticos, então o demo executa **as mesmas rotas** de `src/routes` no navegador: um mini-Express (`Client/src/demo/express-mini.cjs`) faz o papel do Express e um adaptador sobre [sql.js](https://github.com/sql-js/sql.js) (SQLite em WebAssembly) faz o do `node:sqlite`. O esquema (`src/esquema.js`) e o catálogo (`scripts/catalogo.js`) são compartilhados com o servidor. No demo, JWT e bcrypt são substituídos por versões simplificadas e **não seguras** (`jwt-demo.cjs`, `bcrypt-demo.cjs`), só para a sessão de demonstração. Para gerar: `npm --prefix Client run build:demo`.
 
 ## Em produção
 

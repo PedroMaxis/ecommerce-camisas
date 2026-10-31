@@ -14,6 +14,10 @@ export class ErroApi extends Error {
 /** fetch com JSON e token; erros viram ErroApi com a mensagem em português vinda do servidor */
 export async function api(caminho, { method = "GET", corpo } = {}) {
   const token = lerToken();
+  // demo publicado no GitHub Pages: as rotas rodam no navegador, sem servidor (ver src/demo)
+  if (import.meta.env.VITE_DEMO) {
+    return (await import("../demo/servidor.js")).chamar(caminho, { method, corpo, headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  }
   let resp;
   try {
     resp = await fetch(`/api${caminho}`, {
