@@ -27,6 +27,21 @@ module.exports = function rotasUsuarios({ db, config }) {
     res.json(resposta(linha));
   }));
 
-  r.get("/me", autenticar({ db, segredo: config.segredo }), (req, res) => res.json({ user: publico(req.usuario) }));
+  const auth = autenticar({ db, segredo: config.segredo });
+  r.get("/me", auth, (req, res) => res.json({ user: publico(req.usuario) }));
+
+  r.patch("/me", auth, (req, res) => {
+    const name = v.texto(req.body?.name, { campo: "nome", min: 2, max: 80 });
+    db.prepare("UPDATE users SET name = ? WHERE id = ?").run(name, req.usuario.id);
+    res.json({ user: publico({ ...req.usuario, name }) });
+  });
+
+  r.post("/me/password", auth, assincrono(async (req, res) => {
+    const nova = v.senha(req.body?.newPassword);
+    const linha = db.prepare("SELECT password_hash FROM users WHERE id = ?").get(req.usuario.id);
+    if (!(await conferirSenha(String(req.body?.currentPassword ?? ""), linha.password_hash))) throw new HttpError(401, "A senha atual está incorreta.");
+    db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(await gerarHash(nova), req.usuario.id);
+    res.status(204).end();
+  }));
   return r;
 };

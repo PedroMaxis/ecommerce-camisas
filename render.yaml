@@ -1,7 +1,7 @@
 # Um único serviço: a API também entrega o front compilado (Client/dist)
 services:
   - type: web
-    name: tinta-fresca
+    name: ginga
     runtime: node
     buildCommand: npm ci && npm --prefix Client ci && npm --prefix Client run build
     startCommand: npm start

@@ -9,7 +9,7 @@ module.exports = function rotasCarrinho({ db, config }) {
 
   const montar = (userId) => {
     const itens = db.prepare(`
-      SELECT c.product_id AS productId, c.size, c.quantity, p.name, p.color, p.design, p.price_cents AS unitPriceCents,
+      SELECT c.product_id AS productId, c.size, c.quantity, p.name, p.color, p.design, p.cut, p.price_cents AS unitPriceCents,
              COALESCE(s.quantity, 0) AS available
       FROM cart_items c JOIN products p ON p.id = c.product_id
       LEFT JOIN stock s ON s.product_id = c.product_id AND s.size = c.size

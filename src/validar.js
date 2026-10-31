@@ -1,7 +1,12 @@
 const { HttpError } = require("./errors");
 
 const TAMANHOS = ["PP", "P", "M", "G", "GG"];
-const DESENHOS = ["lisa", "listras", "bolinhas", "sol", "tipografica", "degrade"];
+const CATEGORIAS = ["futebol", "praia", "festa", "raiz"];
+const CORTES = ["camiseta", "babylook", "regata", "futebol", "oversized"];
+const PAGAMENTOS = ["pix", "cartao", "boleto"];
+const ENVIOS = ["economico", "expresso"];
+const ESTADOS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+const DESENHOS = ["lisa", "ginga", "pelada", "copacabana", "caju", "sol", "bonfim", "carnaval", "azulejo", "arara", "cobogo", "saudade"];
 
 const invalido = (mensagem) => new HttpError(400, mensagem);
 
@@ -46,9 +51,38 @@ const desenho = (valor) => {
   return valor;
 };
 
+const categoria = (valor) => {
+  if (!CATEGORIAS.includes(valor)) throw invalido(`Categoria inválida. Use: ${CATEGORIAS.join(", ")}.`);
+  return valor;
+};
+
+const corte = (valor) => {
+  if (!CORTES.includes(valor)) throw invalido(`Corte inválido. Use: ${CORTES.join(", ")}.`);
+  return valor;
+};
+const pagamento = (valor) => {
+  if (!PAGAMENTOS.includes(valor)) throw invalido(`Forma de pagamento inválida. Use: ${PAGAMENTOS.join(", ")}.`);
+  return valor;
+};
+const envio = (valor) => {
+  if (!ENVIOS.includes(valor)) throw invalido(`Forma de envio inválida. Use: ${ENVIOS.join(", ")}.`);
+  return valor;
+};
+/** CEP com ou sem hífen → 8 dígitos */
+const cep = (valor) => {
+  const limpo = String(valor ?? "").replace(/\D/g, "");
+  if (limpo.length !== 8) throw invalido("CEP inválido: informe 8 números.");
+  return limpo;
+};
+const uf = (valor) => {
+  const u = String(valor ?? "").trim().toUpperCase();
+  if (!ESTADOS.includes(u)) throw invalido("Estado inválido: use a sigla, como SP ou MG.");
+  return u;
+};
+
 const idDaRota = (valor) => {
   if (!/^\d{1,12}$/.test(String(valor))) throw new HttpError(404, "Não encontrado.");
   return Number(valor);
 };
 
-module.exports = { TAMANHOS, DESENHOS, texto, email, senha, inteiro, tamanho, cor, desenho, idDaRota };
+module.exports = { TAMANHOS, DESENHOS, CATEGORIAS, CORTES, categoria, corte, pagamento, envio, cep, uf, texto, email, senha, inteiro, tamanho, cor, desenho, idDaRota };

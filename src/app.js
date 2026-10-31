@@ -22,7 +22,10 @@ function criarApp({ db, config }) {
 
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
   app.use("/api/users", require("./routes/usuarios")({ db, config }));
-  app.use("/api/products", require("./routes/produtos")({ db, config }));
+  const produtos = require("./routes/produtos")({ db, config });
+  app.use("/api/products", produtos);
+  app.use("/api/admin", require("./routes/admin")({ db, config, produtos }));
+  app.use("/api", require("./routes/loja")({ db, config }));
   app.use("/api/cart", require("./routes/carrinho")({ db, config }));
   app.use("/api/orders", require("./routes/pedidos")({ db, config }));
   app.use("/api", (_req, _res, next) => next(new HttpError(404, "Rota não encontrada.")));

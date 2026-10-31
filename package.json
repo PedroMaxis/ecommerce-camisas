@@ -1,8 +1,8 @@
 {
-  "name": "ecommerce-camisas-api",
-  "version": "2.0.0",
+  "name": "ginga-api",
+  "version": "3.0.0",
   "private": true,
-  "description": "API da loja de camisas (Express + SQLite)",
+  "description": "API da loja Ginga: blusas brasileiras (Express + SQLite)",
   "main": "src/server.js",
   "engines": {
     "node": ">=22.13"

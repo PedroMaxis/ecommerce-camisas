@@ -11,7 +11,7 @@ export function AvisosProvider({ children }) {
   const avisar = useCallback((texto, tipo = "ok") => {
     const id = ++n.current;
     setLista((l) => [...l.slice(-2), { id, texto, tipo }]);
-    setTimeout(() => setLista((l) => l.filter((a) => a.id !== id)), 3800);
+    setTimeout(() => setLista((l) => l.filter((a) => a.id !== id)), 4200);
   }, []);
   return (
     <Avisos.Provider value={avisar}>
@@ -45,14 +45,14 @@ export function SessaoProvider({ children }) {
   const sair = useCallback(() => { guardarToken(null); setUsuario(null); }, []);
 
   const valor = useMemo(() => ({
-    usuario, pronto, sair,
+    usuario, pronto, sair, setUsuario,
     login: (email, password) => entrar("/users/login", { email, password }),
     cadastrar: (name, email, password) => entrar("/users/register", { name, email, password }),
   }), [usuario, pronto, sair, entrar]);
   return <Sessao.Provider value={valor}>{children}</Sessao.Provider>;
 }
 
-/* ---------- carrinho ---------- */
+/* ---------- sacola ---------- */
 const Carrinho = createContext(null);
 export const useCarrinho = () => useContext(Carrinho);
 const VAZIO = { items: [], totalCents: 0, count: 0 };
@@ -75,4 +75,44 @@ export function CarrinhoProvider({ children }) {
     limpar: () => setCarrinho(VAZIO),
   }), [carrinho]);
   return <Carrinho.Provider value={valor}>{children}</Carrinho.Provider>;
+}
+
+/* ---------- favoritos ---------- */
+const Favoritos = createContext(null);
+export const useFavoritos = () => useContext(Favoritos);
+
+export function FavoritosProvider({ children }) {
+  const { usuario } = useSessao();
+  const [ids, setIds] = useState([]);
+
+  useEffect(() => {
+    if (!usuario) { setIds([]); return; }
+    let vivo = true;
+    api("/favorites").then((l) => vivo && setIds(l)).catch(() => {});
+    return () => { vivo = false; };
+  }, [usuario]);
+
+  const alternar = useCallback(async (id) => {
+    const tinha = ids.includes(id);
+    setIds((l) => (tinha ? l.filter((x) => x !== id) : [id, ...l])); // otimista: o coração responde na hora
+    try { await api(`/favorites/${id}`, { method: tinha ? "DELETE" : "PUT" }); }
+    catch (e) { setIds((l) => (tinha ? [id, ...l] : l.filter((x) => x !== id))); throw e; }
+    return !tinha;
+  }, [ids]);
+
+  const valor = useMemo(() => ({ ids, tem: (id) => ids.includes(id), alternar }), [ids, alternar]);
+  return <Favoritos.Provider value={valor}>{children}</Favoritos.Provider>;
+}
+
+/* ---------- catálogo (carregado uma vez e compartilhado: busca, vitrine, faixa, relacionados) ---------- */
+const Catalogo = createContext(null);
+export const useCatalogo = () => useContext(Catalogo);
+
+export function CatalogoProvider({ children }) {
+  const [produtos, setProdutos] = useState(null);
+  const [erro, setErro] = useState("");
+  const carregar = useCallback(() => { setErro(""); api("/products").then(setProdutos).catch((e) => setErro(e.message)); }, []);
+  useEffect(carregar, [carregar]);
+  const valor = useMemo(() => ({ produtos, erro, recarregar: carregar, porId: (id) => produtos?.find((p) => p.id === Number(id)) }), [produtos, erro, carregar]);
+  return <Catalogo.Provider value={valor}>{children}</Catalogo.Provider>;
 }
