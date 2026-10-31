@@ -1,0 +1,14 @@
+# Um único serviço: a API também entrega o front compilado (Client/dist)
+services:
+  - type: web
+    name: ginga
+    runtime: node
+    buildCommand: npm ci && npm --prefix Client ci && npm --prefix Client run build
+    startCommand: npm start
+    envVars:
+      - { key: NODE_VERSION, value: 24 }
+      - { key: NODE_ENV, value: production }
+      - { key: JWT_SECRET, generateValue: true }
+      - { key: DATABASE_FILE, value: /var/data/loja.sqlite }
+      - { key: ADMIN_PASSWORD, sync: false }
+    disk: { name: dados, mountPath: /var/data, sizeGB: 1 }
